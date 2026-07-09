@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import logoDragon from './logo-dragon.png';
+import logoShell from './logo-coquillage.png';
 import './style.css';
 
 const LYRECO = {
@@ -188,7 +188,7 @@ function drawIcon(doc, type, x, y) {
 }
 
 async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } = {}) {
-  const logoDataUrl = await loadDataUrl(logoDragon);
+  const logoDataUrl = await loadDataUrl(logoShell);
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
   const perPage = LYRECO.cols * LYRECO.rows;
   const totalPages = Math.max(1, Math.ceil(reservations.length / perPage));
@@ -207,9 +207,9 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
       doc.rect(x, y, LYRECO.width, LYRECO.height);
     }
 
-    const left = x + 2.6;
+    const left = x + 4.7;
     const top = y + 2.0;
-    const right = x + LYRECO.width - 2.7;
+    const right = x + LYRECO.width - 4.7;
     const width = right - left;
     const fullName = `${normalize(reservation.lastName).toUpperCase()} ${normalize(reservation.firstName)}`.trim();
     const unit = normalize(reservation.unit) || '—';
@@ -219,14 +219,14 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
     const ref = normalize(reservation.reservation);
 
     // Design V11 : rework complet, plus lisible et plus premium sur 70 x 37 mm.
-    const navy = [6, 54, 81];
-    const teal = [12, 112, 135];
-    const gold = [184, 139, 82];
-    const text = [26, 31, 34];
-    const muted = [116, 104, 88];
+    const navy = [150, 132, 86];
+    const teal = [177, 158, 107];
+    const gold = [177, 158, 107];
+    const text = [49, 45, 37];
+    const muted = [112, 101, 78];
 
     // Marque discrète + nom client
-    doc.addImage(logoDataUrl, 'PNG', left + 0.1, top + 0.15, 7.0, 6.7, undefined, 'FAST');
+    doc.addImage(logoDataUrl, 'PNG', left + 0.1, top + 0.45, 7.2, 4.35, undefined, 'FAST');
     doc.setTextColor(...navy);
     fitText(doc, fullName, left + 7.8, top + 5.25, width - 8.2, 10.6, 'bold', 6.8);
 
@@ -392,7 +392,7 @@ function App() {
       <section className="shell">
         <header className="topbar">
           <button className="brand" onClick={triggerEasterEgg} title="Easter egg">
-            <img src={logoDragon} alt="" />
+            <img src={logoShell} alt="" />
             <span>L’étiquettix 3000</span>
           </button>
 
@@ -443,7 +443,7 @@ function App() {
               const { label, shellCount } = splitShells(reservation.type);
               return (
                 <article className="previewLabel" key={reservation.id}>
-                  <img src={logoDragon} alt="" />
+                  <img src={logoShell} alt="" />
                   <div className="previewBody">
                     <strong>{fullName}</strong>
                     <b>LOGEMENT <span>{normalize(reservation.unit) || '—'}</span></b>
