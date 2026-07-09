@@ -1,0 +1,54 @@
+{
+  "name": "etiquettix-3000-v12",
+  "productName": "L'Etiquettix 3000",
+  "version": "1.0.0",
+  "description": "Générateur local d'étiquettes camping au format Lyreco 70 x 37 mm.",
+  "author": "L'Etiquettix 3000",
+  "private": true,
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "desktop": "npm run build && electron .",
+    "dist:win": "npm run build && electron-builder --win nsis portable"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "xlsx": "latest",
+    "jspdf": "latest"
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "fr.etiquettix.app",
+    "productName": "L'Etiquettix 3000",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "${productName}-${version}-${arch}-${target}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  }
+}
