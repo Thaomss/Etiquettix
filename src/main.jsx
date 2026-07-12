@@ -223,7 +223,9 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
     }
 
     const left = x + 4.7;
-    const top = y + 2.0;
+    // Zone de sécurité interne : le gabarit reste strictement en 70 × 37 mm,
+    // mais le contenu reste éloigné des zones non imprimables en haut et en bas.
+    const top = y + 2.7;
     const right = x + LYRECO.width - 4.7;
     const width = right - left;
     const fullName = `${normalize(reservation.lastName).toUpperCase()} ${normalize(reservation.firstName)}`.trim();
@@ -241,12 +243,12 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
     const muted = [112, 101, 78];
 
     // Marque discrète + nom client
-    doc.addImage(logoDataUrl, 'PNG', left + 0.1, top + 0.45, 7.2, 4.35, undefined, 'FAST');
+    doc.addImage(logoDataUrl, 'PNG', left + 0.1, top + 0.2, 7.2, 4.35, undefined, 'FAST');
     doc.setTextColor(...navy);
-    fitText(doc, fullName, left + 7.8, top + 5.25, width - 8.2, 10.6, 'bold', 6.8);
+    fitText(doc, fullName, left + 7.8, top + 4.95, width - 8.2, 10.6, 'bold', 6.8);
 
     // Bloc logement pleine largeur : stable, aligné, sans décalage visuel.
-    const bandY = top + 8.55;
+    const bandY = top + 7.85;
     const bandH = 7.15;
     doc.setFillColor(...navy);
     doc.roundedRect(left + 0.2, bandY, width - 0.4, bandH, 1.15, 1.15, 'F');
@@ -273,7 +275,7 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
     doc.text(fittedUnit, valueCenterX, bandY + 5.2, { align: 'center' });
 
     // Dates : deux zones équilibrées, plus grandes, rapides à lire.
-    const dateY = top + 20.0;
+    const dateY = top + 19.15;
     const boxW = (width - 2.2) / 2;
     const boxH = 5.35;
     function drawDateBox(label, value, bx) {
@@ -282,31 +284,31 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
       doc.roundedRect(bx, dateY - 3.7, boxW, boxH, 0.75, 0.75, 'FD');
       drawIcon(doc, 'calendar', bx + 1.3, dateY - 0.2);
       doc.setTextColor(0, 0, 0);
-      setFont(doc, 6.55, 'bold');
+      setFont(doc, 6.85, 'bold');
       doc.text(label, bx + 5.1, dateY - 0.05);
-      fitText(doc, value, bx + 11.0, dateY - 0.05, boxW - 12.4, 7.05, 'normal', 5.4);
+      fitText(doc, value, bx + 11.0, dateY - 0.05, boxW - 12.4, 7.35, 'normal', 5.65);
     }
     drawDateBox('Arr.', arrival, left + 0.2);
     drawDateBox('Dép.', departure, left + 0.2 + boxW + 2.2);
 
     // Hébergement + coquillages : une ligne principale, très lisible.
-    const typeY = top + 27.0;
+    const typeY = top + 25.95;
     doc.setTextColor(...text);
     drawIcon(doc, 'home', left + 0.4, typeY);
     const shellArea = shellCount ? 15.0 : 0;
-    const lines = fitTextTwoLines(doc, type, left + 5.0, typeY, width - 5.5 - shellArea, 7.4, 'normal', 3.2);
-    const shellY = lines > 1 ? top + 29.8 : top + 26.3;
+    const lines = fitTextTwoLines(doc, type, left + 5.0, typeY, width - 5.5 - shellArea, 7.85, 'normal', 3.35);
+    const shellY = lines > 1 ? top + 28.55 : top + 25.25;
     const shellSpacing = 2.95;
     const shellsWidth = Math.max(0, shellCount - 1) * shellSpacing;
     const startShellX = right - 2.8 - shellsWidth;
-    for (let i = 0; i < shellCount; i += 1) drawShell(doc, startShellX + i * shellSpacing, shellY, 1.82);
+    for (let i = 0; i < shellCount; i += 1) drawShell(doc, startShellX + i * shellSpacing, shellY, 2.02);
 
     // Bas de carte : trait signature + référence discrète.
     doc.setDrawColor(...teal);
     doc.setLineWidth(0.55);
-    doc.line(left + 0.2, top + 31.35, right - 0.2, top + 31.35);
+    doc.line(left + 0.2, top + 29.95, right - 0.2, top + 29.95);
     doc.setTextColor(...muted);
-    fitText(doc, ref ? `Réservation ${ref}` : '', left + 0.2, top + 34.55, width - 0.4, 6.25, 'normal', 5.0);
+    fitText(doc, ref ? `Réservation ${ref}` : '', left + 0.2, top + 32.85, width - 0.4, 6.75, 'normal', 5.35);
   });
 
   doc.setProperties({

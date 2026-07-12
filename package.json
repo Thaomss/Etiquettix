@@ -1,7 +1,7 @@
 {
   "name": "etiquettix-3000-v12",
   "productName": "L'Etiquettix 3000",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Générateur local d'étiquettes camping au format Lyreco 70 x 37 mm.",
   "author": "L'Etiquettix 3000",
   "private": true,
