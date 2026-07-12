@@ -37,29 +37,44 @@ function getByAliases(row, list) {
   return '';
 }
 
-function excelSerialToDate(serial) {
-  const parsed = XLSX.SSF.parse_date_code(serial);
-  if (!parsed) return null;
-  return new Date(parsed.y, parsed.m - 1, parsed.d);
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function formatDateParts(year, month, day) {
+  if (!year || !month || !day) return '';
+  return `${pad2(day)}/${pad2(month)}/${String(year).padStart(4, '0')}`;
 }
 
 function formatDate(value) {
-  if (!value) return '';
-  let date = value instanceof Date ? value : null;
-  if (!date && typeof value === 'number') date = excelSerialToDate(value);
-  if (!date && typeof value === 'string') {
-    const clean = value.replace(/[!'’]/g, '').replace(/\s+/g, '').trim();
-    const match = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/);
-    if (match) {
-      const [, d, m, y] = match;
-      const fullYear = y.length === 2 ? Number(`20${y}`) : Number(y);
-      date = new Date(fullYear, Number(m) - 1, Number(d));
-    } else {
-      date = new Date(clean);
-    }
+  if (value === '' || value === null || value === undefined) return '';
+
+  // Les dates Excel restent des nombres bruts. On récupère directement
+  // leurs composantes au lieu de passer par un objet Date, ce qui évite
+  // tout décalage d'un jour lié au fuseau horaire.
+  if (typeof value === 'number') {
+    const parsed = XLSX.SSF.parse_date_code(value);
+    return parsed ? formatDateParts(parsed.y, parsed.m, parsed.d) : normalize(value);
   }
-  if (!date || Number.isNaN(date.getTime())) return normalize(value);
-  return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    // XLSX peut parfois fournir une date à minuit UTC : utiliser les champs UTC
+    // garantit que le jour inscrit dans le tableau reste strictement identique.
+    return formatDateParts(value.getUTCFullYear(), value.getUTCMonth() + 1, value.getUTCDate());
+  }
+
+  if (typeof value === 'string') {
+    const clean = value.replace(/[!'’]/g, '').replace(/\s+/g, '').trim();
+    const fr = clean.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/);
+    if (fr) {
+      const [, day, month, year] = fr;
+      return formatDateParts(year.length === 2 ? Number(`20${year}`) : Number(year), Number(month), Number(day));
+    }
+    const iso = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:T.*)?$/);
+    if (iso) return formatDateParts(Number(iso[1]), Number(iso[2]), Number(iso[3]));
+  }
+
+  return normalize(value);
 }
 
 function splitShells(type) {
@@ -78,7 +93,7 @@ function readReservations(file) {
     reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
     reader.onload = (event) => {
       try {
-        const workbook = XLSX.read(event.target.result, { type: 'array', cellDates: true });
+        const workbook = XLSX.read(event.target.result, { type: 'array', cellDates: false });
         const sheet = workbook.Sheets.Reservations || workbook.Sheets[workbook.SheetNames[0]];
         if (!sheet) throw new Error('Aucune feuille trouvée.');
         const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: true });
@@ -266,7 +281,7 @@ async function buildPdf(reservations, { guides = true, fileLabel = 'arrivees' } 
       doc.setFillColor(248, 251, 251);
       doc.roundedRect(bx, dateY - 3.7, boxW, boxH, 0.75, 0.75, 'FD');
       drawIcon(doc, 'calendar', bx + 1.3, dateY - 0.2);
-      doc.setTextColor(...navy);
+      doc.setTextColor(0, 0, 0);
       setFont(doc, 6.55, 'bold');
       doc.text(label, bx + 5.1, dateY - 0.05);
       fitText(doc, value, bx + 11.0, dateY - 0.05, boxW - 12.4, 7.05, 'normal', 5.4);

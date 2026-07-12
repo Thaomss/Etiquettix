@@ -266,7 +266,7 @@ h2 { margin: 0; color: white; font-size: 28px; letter-spacing: -.04em; }
   white-space: nowrap;
 }
 .previewBody b span { font-size: 17px; letter-spacing: .04em; }
-.previewBody p { margin: 0; display: flex; gap: 12px; color: #514a3a; font-size: 12px; font-weight: 850; }
+.previewBody p { margin: 0; display: flex; gap: 12px; color: #000; font-size: 12px; font-weight: 850; }
 .previewBody small { color: #373228; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .previewBody i { color: #9d8957; font-style: normal; letter-spacing: 1px; }
 .toast {
